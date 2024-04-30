@@ -4,7 +4,8 @@ const app = express();
 
 app.use(bodyParser.json());
 
-// Sample data structure to store the collection of books.
+
+/// Sample data structure to store the collection of books.
 let books = [
   { id: 1, title: 'Book1', author: 'Author1', publicationYear: 2020 }
 ];
@@ -49,12 +50,16 @@ app.put('/books/:id', (req, res) => {
 });
 
 // DELETE /books/:id
+app.delete('/books/:id', (req, res) => {
+  const bookIndex = books.findIndex(b => b.id === parseInt(req.params.id));
+  if (bookIndex !== -1) {
+    const [deletedBook] = books.splice(bookIndex, 1);
+    res.status(200).json(deletedBook);
+  } else {
+    res.status(404).json({ error: 'Book not found' });
+  }
+});
 
-
-module.exports = app;
-
-if (require.main === module) {
-  app.listen(3000, () => {
-    console.log('Server running on port 3000');
-  });
-}
+app.listen(3000, () => {
+  console.log('Server listening on port 3000');
+});
