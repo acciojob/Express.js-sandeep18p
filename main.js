@@ -1,58 +1,67 @@
 const express = require('express');
+const bodyParser = require('body-parser');
 const app = express();
-app.use(express.json());
 
-// Data Structure to store books
-let books = [];
-let idCounter = 1;
+app.use(bodyParser.json());
 
-// GET /books - Retrieve all books
+// Sample data structure to store the collection of books.
+let books = [
+  { id: 1, title: 'Book1', author: 'Author1', publicationYear: 2020 }
+];
+let currentId = 2; // Simulating auto incrementing IDs
+
+// GET /books
 app.get('/books', (req, res) => {
-  res.json(books);
+  res.status(200).json(books);
 });
 
-// GET /books/:id - Retrieve a specific book by ID
+// GET /books/:id
 app.get('/books/:id', (req, res) => {
-  const book = books.find(book => book.id === req.params.id);
+  const book = books.find(b => b.id === parseInt(req.params.id));
   if (book) {
-    res.json(book);
+    res.status(200).json(book);
   } else {
-    res.status(404).json({ message: 'Book not found' });
+    res.status(404).json({ error: 'Book not found' });
   }
 });
 
-// POST /books - Create a new book
+// POST /books
 app.post('/books', (req, res) => {
-  const { title, author, publicationYear } = req.body;
-  const newBook = { id: idCounter++, title, author, publicationYear };
+  const newBook = {
+    id: currentId++,
+    title: req.body.title,
+    author: req.body.author,
+    publicationYear: req.body.publicationYear
+  };
   books.push(newBook);
   res.status(201).json(newBook);
 });
 
-// PUT /books/:id - Update a book by ID
+// PUT /books/:id
 app.put('/books/:id', (req, res) => {
-  const bookIndex = books.findIndex(book => book.id === req.params.id);
-  if (bookIndex !== -1) {
-    const { title, author, publicationYear } = req.body;
-    books[bookIndex] = { ...books[bookIndex], title, author, publicationYear };
-    res.json(books[bookIndex]);
+  const book = books.find(b => b.id === parseInt(req.params.id));
+  if (book) {
+    Object.assign(book, req.body);
+    res.status(200).json(book);
   } else {
-    res.status(404).json({ message: 'Book not found' });
+    res.status(404).json({ error: 'Book not found' });
   }
 });
 
-// DELETE /books/:id - Delete a book by ID
+// DELETE /books/:id
 app.delete('/books/:id', (req, res) => {
-  const bookIndex = books.findIndex(book => book.id === req.params.id);
+  const bookIndex = books.findIndex(b => b.id === parseInt(req.params.id));
   if (bookIndex !== -1) {
-    books.splice(bookIndex, 1);
-    res.status(204).send();
+    const [deletedBook] = books.splice(bookIndex, 1);
+    res.status(200).json(deletedBook);
   } else {
-    res.status(404).json({ message: 'Book not found' });
+    res.status(404).json({ error: 'Book not found' });
   }
 });
 
-// Server setup
-const server = app.listen(3000, () => {
-  console.log('Server listening on port 3000');
-});
+
+
+
+  app.listen(3000, () => {
+    console.log('Server running on port 3000');
+  });
